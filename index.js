@@ -200,10 +200,10 @@ function processString(message) {
 
             let rndm = ran(data.answers)
 
-            const { bool, results } = stringContainsList(message, data.getinfoafter)
+            const resultsData = stringContainsList(message, data.getinfoafter)
 
-            if (data.getinfoafter.length > 0 && bool) {
-                for (const result of results) {
+            if (data.getinfoafter.length > 0 && resultsData.length > 0) {
+                for (const result of resultsData) {
                     const parsedData = message.split(result)[1].split(" ")[0]
                     const answer = data.function(parsedData)
                     rndm = ran(data.answers).format(answer, parsedData)
@@ -229,15 +229,11 @@ String.prototype.format = function () {
 };
 
 function stringContainsList(s, l) {
-    let result = false
     let results = []
     for (const a of l)
-        if (s.includes(a)) {
-            result = true
+        if (s.includes(a))
             results.push(a)
-            break
-        }
-    return { bool: result, results: results }
+    return results
 }
 
 function ran(list) {
