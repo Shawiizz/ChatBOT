@@ -160,17 +160,20 @@ const data = [
 ]
 
 function getWeather(ville) {
-    return new Promise(async (resolve) => {
-        weather.find({ search: ville, degreeType: 'C' }, (err, res) => {
-            if (err) resolve(['inconnu', 'inconnu', 'inconnu'])
-            try {
-                resolve([res[0].current.temperature, res[0].location.name, res[0].current.observationtime])
-            } catch (e) {
-                //Peut être ici donner la météo locale ?
-                resolve(['inconnu', 'inconnu', 'inconnu'])
-            }
-        })
-    });
+    if (ville === null) {
+        //ici tu prend la météo avec la localisation
+    } else
+        return new Promise(async (resolve) => {
+            weather.find({ search: ville, degreeType: 'C' }, (err, res) => {
+                if (err) resolve(['inconnu', 'inconnu', 'inconnu'])
+                try {
+                    resolve([res[0].current.temperature, res[0].location.name, res[0].current.observationtime])
+                } catch (e) {
+                    //Peut être ici donner la météo locale ?
+                    resolve(['inconnu', 'inconnu', 'inconnu'])
+                }
+            })
+        });
 }
 
 function getHour() {
@@ -213,12 +216,13 @@ async function processString(message) {
 
             const resultsData = stringContainsList(message, data.getinfoafter)
 
-            if (data.getinfoafter.length > 0 && resultsData.length > 0) {
-                for (const result of resultsData) {
-                    const parsedData = message.split(result)[1].split(" ")[0]
-                    const answer = await data.function(parsedData)
-                    rndm = ran(data.answers).format(...answer)
-                }
+            if (data.getinfoafter.length > 0) {
+                let parsedData = null
+                if (resultsData.length > 0)
+                    for (const result of resultsData)
+                        parsedData = message.split(result)[1].split(" ")[0]
+                const answer = await data.function(parsedData)
+                rndm = ran(data.answers).format(...answer)
             }
 
             outSentence += (up ? rndm.charAt(0).toUpperCase() + rndm.slice(1) : rndm) + add
@@ -253,7 +257,7 @@ function ran(list) {
 
 function numberOfWordMatch(words, dataword) {
     let numberMatch = 0
-    words = words.filter(function(item, pos) {
+    words = words.filter(function (item, pos) {
         return words.indexOf(item) == pos;
     })
     for (const word of words)
