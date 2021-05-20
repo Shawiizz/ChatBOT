@@ -1,4 +1,5 @@
-const readline = require('readline');
+const readline = require('readline')
+const weather = require('weather-js')
 
 const data = [
     {
@@ -138,10 +139,10 @@ const data = [
         answertype: 'normal',
         words: ['quelle', 'quel', 'temps', 'fait', 'il', 'fait-il', 'a', 'à'],
         important: ['temps'],
-        answers: ['il fait {0} à {1}'],
+        answers: ['il fait {0}°C à {1} aujourd\'hui à {2}'],
         after: [],
         getinfoafter: [' à ', ' a ', ' de ', ' dans '],
-        function: weather,
+        function: getWeather,
         minimalmatch: 3,
         minimalpercent: 0
     },
@@ -158,15 +159,25 @@ const data = [
     }
 ]
 
-function weather(ville) {
-    return 'beau'
+function getWeather(ville) {
+    return new Promise(async (resolve) => {
+        weather.find({ search: ville, degreeType: 'C' }, (err, res) => {
+            if (err) resolve(['inconnu', 'inconnu', 'inconnu'])
+            try {
+                resolve([res[0].current.temperature, res[0].location.name, res[0].current.observationtime])
+            } catch (e) {
+                //Peut être ici donner la météo locale ?
+                resolve(['inconnu', 'inconnu', 'inconnu'])
+            }
+        })
+    });
 }
 
 function getHour() {
     return new Date().getHours() + "h" + new Date().getMinutes()
 }
 
-function processString(message) {
+async function processString(message) {
     let builtSentence = []
     let outSentence = ''
 
@@ -176,7 +187,7 @@ function processString(message) {
         for (const req of data) {
             const match = numberOfWordMatch(words, req.words)
             if (message.length <= 3 && req.minimalmatch >= 3) req.minimalmatch--
-            if (match < req.minimalmatch || (match < req.minimalmatch && req.minimalpercent > 0 && (message.split(' ').length/100*match) < req.minimalpercent) || (req.important.length > 0 && numberOfWordMatch(words, req.important) < 1)) continue
+            if (match < req.minimalmatch || (match < req.minimalmatch && req.minimalpercent > 0 && (message.split(' ').length / 100 * match) < req.minimalpercent) || (req.important.length > 0 && numberOfWordMatch(words, req.important) < 1)) continue
 
             builtSentence.push(req)
         }
@@ -205,8 +216,8 @@ function processString(message) {
             if (data.getinfoafter.length > 0 && resultsData.length > 0) {
                 for (const result of resultsData) {
                     const parsedData = message.split(result)[1].split(" ")[0]
-                    const answer = data.function(parsedData)
-                    rndm = ran(data.answers).format(answer, parsedData)
+                    const answer = await data.function(parsedData)
+                    rndm = ran(data.answers).format(...answer)
                 }
             }
 
@@ -261,8 +272,8 @@ const rl = readline.createInterface({
 });
 
 function ask() {
-    rl.question('Message : ', (answer) => {
-        console.log(processString(answer));
+    rl.question('Message : ', async (answer) => {
+        console.log((await processString(answer)));
         ask()
     });
 }
