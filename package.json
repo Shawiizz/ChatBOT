@@ -7,5 +7,8 @@
     "start": "node index"
   },
   "author": "Shawiiz_z",
-  "license": "YENAPAS"
+  "license": "YENAPAS",
+  "dependencies": {
+    "weather-js": "^2.0.0"
+  }
 }
