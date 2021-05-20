@@ -171,12 +171,20 @@ const data = [
 async function getWeather(ville) {
     if (ville === null)
         try {
-            return (await weather(require('geoip-lite').lookup(ip).city))
+            const result = await weather(require('geoip-lite').lookup(ip).city)
+            if (result === null) return "Il faut que tu spécifies une ville !"
+            else return result
         } catch (e) {
             return "Il faut que tu spécifies une ville !"
         }
     else
-        return (await weather(ville))
+        try {
+            const result = await weather(ville)
+            if (result === null) return "Il faut que tu spécifies une ville !"
+            else return result
+        } catch (e) {
+
+        }
 
     function weather(ville) {
         return new Promise(async (resolve) => {
