@@ -181,7 +181,7 @@ async function processString(message) {
     let builtSentence = []
     let outSentence = ''
 
-    for (const phrase of message.split(/[.?!]/).join(' et ').split(' et ')) {
+    for (const phrase of message.split(/[.?!]/)) {
         const words = removeShit(phrase.toLowerCase().replace(/,/g, '').replace(/é/g, 'e')).split(' ')
 
         for (const req of data) {
@@ -253,6 +253,9 @@ function ran(list) {
 
 function numberOfWordMatch(words, dataword) {
     let numberMatch = 0
+    words = words.filter(function(item, pos) {
+        return words.indexOf(item) == pos;
+    })
     for (const word of words)
         if (dataword.includes(word))
             numberMatch++
