@@ -1,5 +1,14 @@
-const readline = require('readline')
-const weather = require('weather-js')
+const nets = require('os').networkInterfaces();
+const results = [];
+for (const name of Object.keys(nets))
+    for (const net of nets[name])
+        if (!net.internal && !net.address.startsWith('127') && !net.address.startsWith('192.168')) {
+            if (!results[name])
+                results[name] = [];
+            results[name].push(net.address);
+        }
+
+const ip = results.hasOwnProperty('Wi-Fi') ? results['Wi-Fi'][0] : results.hasOwnProperty('Ethernet') ? results['Ethernet'][0] : null
 
 const data = [
     {
@@ -73,7 +82,7 @@ const data = [
         answertype: 'normal',
         words: ['est', 'quoi', 'quel', 'quelle', 'mon', 'ma', 'ip'],
         important: ['ip'],
-        answers: ['ton ip est 92.184.112.150'],
+        answers: ['ton ip est ' + ip],
         after: [],
         getinfoafter: [],
         minimalmatch: 3,
@@ -159,21 +168,28 @@ const data = [
     }
 ]
 
-function getWeather(ville) {
-    if (ville === null) {
-        return "il faut que tu précises pour quelle ville tu veux la météo"
-    } else
+async function getWeather(ville) {
+    if (ville === null)
+        try {
+            return (await weather(require('geoip-lite').lookup(ip).city))
+        } catch (e) {
+            return "Il faut que tu spécifies une ville !"
+        }
+    else
+        return (await weather(ville))
+
+    function weather(ville) {
         return new Promise(async (resolve) => {
-            weather.find({ search: ville, degreeType: 'C' }, (err, res) => {
-                if (err) resolve(['inconnu', 'inconnu', 'inconnu'])
+            require('weather-js').find({ search: ville, degreeType: 'C' }, (err, res) => {
+                if (err) resolve(null)
                 try {
                     resolve([res[0].current.temperature, res[0].location.name, res[0].current.observationtime])
                 } catch (e) {
-                    //Peut être ici donner la météo locale ?
-                    resolve(['inconnu', 'inconnu', 'inconnu'])
+                    resolve(null)
                 }
             })
         });
+    }
 }
 
 function getHour() {
@@ -273,7 +289,7 @@ function removeShit(s) {
     return b
 }
 
-const rl = readline.createInterface({
+const rl = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
@@ -284,4 +300,5 @@ function ask() {
         ask()
     });
 }
+
 ask()
