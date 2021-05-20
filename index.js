@@ -181,7 +181,7 @@ async function processString(message) {
     let builtSentence = []
     let outSentence = ''
 
-    for (const phrase of message.split(/[.?!]/)) {
+    for (const phrase of message.split(/[.?!]/).join(' et ').split(' et ')) {
         const words = removeShit(phrase.toLowerCase().replace(/,/g, '').replace(/é/g, 'e')).split(' ')
 
         for (const req of data) {
