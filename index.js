@@ -222,11 +222,7 @@ async function processString(message) {
                     for (const result of resultsData)
                         parsedData = message.split(result)[1].split(" ")[0]
                 const answer = await data.function(parsedData)
-<<<<<<< HEAD
                 rndm = Array.isArray(answer) ? ran(data.answers).format(...answer) : answer
-=======
-                rndm = ran(data.answers).format(...answer)
->>>>>>> 69720450e959682122d34c15b03178911697b088
             }
 
             outSentence += (up ? rndm.charAt(0).toUpperCase() + rndm.slice(1) : rndm) + add
